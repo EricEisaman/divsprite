@@ -5,6 +5,11 @@ DS.Sprite = function(opts){
    this.sheet = opts.sheet || '';
    this.width = opts.width || 64;
    this.height = opts.height || 64;
+   if (typeof opts.isPlaying !== 'undefined') {
+      this.isPlaying = opts.isPlaying
+   } else {
+      this.isPlaying = true;
+   }
    this.avatar = document.createElement('div');
    this.avatar.style.position = 'absolute';
    this.avatar.style.width = (opts.width + 'px') || '64px';
@@ -33,14 +38,26 @@ DS.Sprite.prototype = {
      this.frameTime = 0;
      this.moving = false;
      this.FPR = DS.computeFramesPerRow(this);
+     for(i=0;i<this.anims.size;i++){
+       if (typeof this.anims[i] == 'undefined') {
+          this.anims[i].repeat = true;
+       }
+     }
+   },
+   pause: function(){
+     this.isPlaying = false;
+   },
+   play: function(){
+     this.isPlaying = true;
    },
    playAnim: function(key){
-   	 if(this.currentAnim.name!=key){
+     if(this.currentAnim.name!=key){
    	 	this.currentAnim = this.anims[key];
       this.currentAnim.name = key;
    	 	this.currentFrame = this.currentAnim.start;
    	    if(!this.currentAnim.speed)this.currentAnim.speed = 5;
    	 };
+     this.isPlaying = true;
    },
    update: function(dt){
      if(this.currentAnim)this.frameForward(dt);
@@ -70,14 +87,24 @@ DS.Sprite.prototype = {
    frameForward: function(dt){
    	  this.frameTime+=dt;
    	  if(this.frameTime>500/this.currentAnim.speed){
-   	  	if(this.currentFrame > this.currentAnim.end) {
-   	  		this.currentFrame = this.currentAnim.start;
-   	  	}
-   	  	var row = Math.floor(this.currentFrame/this.FPR);
-   	  	var frame = this.currentFrame%this.FPR;
-        this.avatar.style.backgroundPosition = -frame*this.width + 'px' + ' ' + -1*row*this.height +  'px';
-        this.currentFrame++;
-        this.frameTime=0;
+        //HANDLE NON-REPEATING ANIMS
+        if(this.currentFrame > this.currentAnim.end && this.currentAnim.repeat == false){
+          //set current anim to current anim next or pause
+          if (typeof this.currentAnim.next !== 'undefined') {
+             this.playAnim(this.currentAnim.next);
+          } else {
+             this.pause();
+          }
+        } else { //HANDLE REPEATING ANIMS
+          if(this.currentFrame > this.currentAnim.end) {
+     	  		this.currentFrame = this.currentAnim.start;
+     	  	}
+     	  	var row = Math.floor(this.currentFrame/this.FPR);
+     	  	var frame = this.currentFrame%this.FPR;
+          this.avatar.style.backgroundPosition = -frame*this.width + 'px' + ' ' + -1*row*this.height +  'px';
+          this.currentFrame++;
+          this.frameTime=0;
+        }
    	  }
    },
    move: function(direction){
@@ -103,8 +130,11 @@ DS.mainLoop = function(){
 
     DS.time = now;
     for(i=0; i<DS.sprites.length; i++){
-       DS.sprites[i].update(dt);
-       //console.log('updating a sprite');
+       if(DS.sprites[i].isPlaying){
+         DS.sprites[i].update(dt);
+         //console.log('updating sprite '+i+' of '+DS.sprites.length);
+         //console.log('isPlaying: '+DS.sprites[i].isPlaying);
+       }
     }
 }
 DS.mainLoop();
