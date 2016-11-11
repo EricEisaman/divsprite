@@ -29,6 +29,9 @@ DS.Sprite = function(opts){
    this.speed = opts.speed || 4;
    this.x = opts.x || 0;
    this.y = opts.y || 0;
+   //other properties modified with methods
+   this.hitboxes = [];
+   this.updates = [];
 };
 
 DS.Sprite.prototype = {
@@ -83,6 +86,9 @@ DS.Sprite.prototype = {
      	this.avatar.style.left = this.x + 'px';
      	this.avatar.style.top = this.y + 'px';
      }
+     this.updates.forEach(function(update){
+       update(dt);
+     });
    },
    frameForward: function(dt){
    	  this.frameTime+=dt;
@@ -112,6 +118,36 @@ DS.Sprite.prototype = {
    },
    stop: function(){
    	    this.moving = false;
+   },
+   //name,width,height,offsetx,offsety,callback
+   addHitBox: function(name,w,h,ox,oy){
+     var hb = document.createElement('div');
+     hb.style.width = w + 'px';
+     hb.style.height = h + 'px';
+     hb.style.position = 'absolute';
+     hb.style.top = oy + 'px';
+     hb.style.left = ox + 'px';
+     hb.overlaps = function overlaps(elem){
+     	var r1 = hb.getBoundingClientRect();
+     	var r2 = elem.getBoundingClientRect()
+     	return !(r1.right < r2.left ||
+                     r1.left > r2.right ||
+                     r1.bottom < r2.top ||
+                     r1.top > r2.bottom)
+     }
+     this.avatar.appendChild(hb);
+     this.hitboxes[name] = hb;
+   },
+   getWidth: function(){
+     var r = this.avatar.getBoundingClientRect();
+     return r.right - r.left;
+   },
+   getHeight: function(){
+     var r = this.avatar.getBoundingClientRect();
+     return r.bottom - r.top;
+   },
+   addUpdate: function(update){
+     this.updates.push(update);
    }
 };
 
