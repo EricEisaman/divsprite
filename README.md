@@ -1,1 +1,1 @@
-# domsprite
+# divsprite
