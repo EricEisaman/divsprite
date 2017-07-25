@@ -38,8 +38,8 @@ var buddy = new DS.Sprite({
 });
 
 buddy.addHitBox('feet',
-							buddy.getWidth()/2,buddy.getHeight()/14,
-							buddy.getWidth()/4,0.9*buddy.getHeight());
+		buddy.getWidth()/2,buddy.getHeight()/14,
+		buddy.getWidth()/4,0.9*buddy.getHeight());
 
 var healthHUD = document.createElement('div');
 healthHUD.style.position = 'absolute';
@@ -188,19 +188,19 @@ function onKeyUp(e){
             voice.lang = "en-US";
             speechSynthesis.speak(voice);
             break;
-					case 'open':
-					  chest.playAnim('openChest');
-						chest.isOpen = true;
-						break;
-					case 'close':
-					  chest.playAnim('closeChest');
-						chest.isOpen = false;
-						break;
-					case 'grow':
-						flowers.forEach(function(f){
-							f.playAnim('grow');
-						});
-						break;
+	  case 'open':
+	    chest.playAnim('openChest');
+	    chest.isOpen = true;
+	    break;
+	  case 'close':
+	    chest.playAnim('closeChest');
+	    chest.isOpen = false;
+	    break;
+	  case 'grow':
+	    flowers.forEach(function(f){
+		f.playAnim('grow');
+	    });
+	    break;
         }
         msg.innerText = input;
     }, false);
